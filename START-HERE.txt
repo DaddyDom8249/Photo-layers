@@ -1,0 +1,26 @@
+LayerPeel Studio | Local edition
+
+This bundle includes the editor, WebAssembly runtime, and the segmentation and NSFW filter models.
+The editor can run on loopback without a sign-in or internet connection.
+
+1. Extract this ZIP to a folder.
+2. Open a terminal in the extracted folder and run:
+     python3 start.py
+   On Windows use:
+     py -3 start.py
+3. Open http://127.0.0.1:8046/ in Chrome.
+4. Keep the terminal open while using the editor. Press Ctrl+C to stop it.
+
+On Android, the hosted edition can be cached using Enable offline and opened
+from Chrome or its home-screen shortcut. To run this local ZIP directly on
+Android, you need a Python 3 environment or a local HTTP server that serves the
+included app folder from a loopback address. The local ZIP is a web app.
+
+X-Ray visualization maps colors and edges from visible pixels. Material Map
+colors indicate segmentation categories. Masks can be corrected with Restore
+and Erase. Download ZIP includes transparent source PNGs and layers.json.
+
+Models: MediaPipe SelfieMulticlass, EfficientDet-Lite0, and MagicTouch.
+Runtime: LiteRT.js 2.5.3 CPU WebAssembly. ZIP encoder: fflate 0.8.2.
+
+Block NSFW imports is enabled by default. Turn it off in the editor to skip the local check.

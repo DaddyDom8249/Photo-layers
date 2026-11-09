@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#101620">
+<meta name="description" content="A local photo layer separation and editing workspace.">
+<title>LayerPeel Studio</title>
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="stylesheet" href="style.css?v=7">
+</head>
+<body>
+<header class="top"><div class="brand"><img src="icon.svg" alt="" width="42" height="42"><div><strong>LayerPeel <span>Studio</span></strong><small>PHOTO LAYER WORKSPACE</small></div></div><button id="offline" class="pill" title="Download the editor and AI models for offline use"><i></i><span>Enable offline</span></button></header>
+<main>
+<section class="intro"><div><p class="eyebrow">01 / WORKSPACE</p><h1>Layer separation</h1><p class="muted">Extract visible regions, inspect them in X-Ray, and export your layers.</p></div><div class="actions"><label class="photo-picker"><span aria-hidden="true">↥ &nbsp; Open photo</span><input id="open" type="file" accept="image/*" aria-label="Open photo"></label><button id="segment" class="primary" disabled>✦ &nbsp; Separate layers</button></div></section>
+<label class="filter-setting"><input id="nsfwFilter" type="checkbox" checked> Block NSFW imports <small>On-device check</small></label>
+<div id="status" role="status" aria-live="polite"><i></i><span>Ready for a photo</span></div>
+<div class="workspace">
+<section class="viewer" aria-label="Image workspace">
+<div class="panel-head"><div><span class="eyebrow">PREVIEW</span><span class="dimensions" id="dimensions">No photo</span></div><div class="segmented"><button id="composite" aria-pressed="true">Composite</button><button id="exploded" aria-pressed="false">Exploded</button></div></div>
+<nav class="view-modes" aria-label="Preview mode">
+<button data-view="normal" aria-pressed="true">Normal</button><button data-view="material" aria-pressed="false">Material</button><button data-view="outline" aria-pressed="false">Outline</button><button data-view="peel" aria-pressed="false">Layer Peel</button><button data-view="xray" aria-pressed="false">✦ X-Ray</button>
+</nav>
+<div class="stage" id="stage">
+<canvas id="view" hidden aria-label="Photo layer canvas"></canvas>
+<div id="empty" class="empty"><div class="stack-art" aria-hidden="true"><b></b><b></b><b></b><b></b></div><h2>Open a photo</h2><p>Drop an image here or choose one from your device.</p><label class="photo-picker"><span aria-hidden="true">Choose photo</span><input id="choose" type="file" accept="image/*" aria-label="Choose photo"></label></div>
+<div class="stage-tag" id="stageTag" hidden><i></i> SOURCE PIXELS</div>
+</div>
+<div class="preview-controls"><label for="spacing">Layer spacing</label><input id="spacing" type="range" min="0" max="100" value="60" disabled><output id="gap">60%</output></div>
+<div class="zoom-controls"><label for="zoom">Zoom</label><input id="zoom" type="range" min="100" max="300" value="100"><output id="zoomValue">100%</output><button id="reset" disabled>Reset alignment</button></div>
+</section>
+<aside class="sidebar">
+<section class="panel"><div class="panel-head"><div><span class="eyebrow">LAYER STACK</span><span id="count" class="counter">0</span></div><button id="add" disabled>＋ Blank layer</button></div><div id="layers" class="layer-list"><p class="placeholder">Your extracted layers will appear here.</p></div></section>
+<section class="panel inspector"><div class="panel-head"><span class="eyebrow">LAYER EDITOR</span><span id="selection" class="dimensions">No selection</span></div>
+<fieldset id="properties" disabled><label class="name">Name<input id="name" maxlength="60" type="text"></label><label class="slider">Opacity <input type="range" id="opacity" min="0" max="100" value="100"><output id="alpha">100%</output></label><div class="numbers"><label>X <input type="number" id="x" step="1"></label><label>Y <input type="number" id="y" step="1"></label><label>Angle ° <input type="number" id="rotation" min="-360" max="360"></label></div><div class="tools"><button data-mode="move" aria-pressed="true">Move</button><button data-mode="keep" aria-pressed="false">Restore</button><button data-mode="erase" aria-pressed="false">Erase</button></div><label class="slider">Brush <input id="brush" type="range" min="1" max="100" value="18"><output id="brushSize">18</output></label><div class="tools"><button id="undo" disabled>Undo stroke</button><button id="isolate" aria-pressed="false">Isolate</button><button id="raise" aria-label="Move layer forward">Forward</button><button id="lower" aria-label="Move layer backward">Back</button></div></fieldset>
+<div class="tap-tool"><button id="tap" disabled aria-pressed="false">✦ &nbsp; Tap to extract an object</button><p id="toolHelp">Select a layer to move or refine its mask.</p></div></section>
+<section class="panel styling">
+<div class="panel-head"><span class="eyebrow">X-RAY STYLING</span><span class="dimensions">PREVIEW EFFECTS</span></div>
+<fieldset id="styling" disabled>
+<label class="style-select">Target <select id="styleTarget"><option value="all">Entire view</option><option value="layer">Selected layer</option></select></label>
+<label class="style-select">Preset <select id="preset"><option value="inherit" hidden>Use view settings</option><option value="normal">Normal</option><option value="xray">Blue X-Ray</option><option value="gray">Grayscale</option><option value="edge">Edge Detection</option><option value="material">Material Map</option><option value="isolate">Layer Isolation</option></select></label>
+<label class="style-slider">X-Ray intensity <input id="intensity" type="range" min="0" max="100"><output id="intensityValue"></output></label>
+<label class="style-slider">Edge detail <input id="detail" type="range" min="0" max="100"><output id="detailValue"></output></label>
+<label class="style-slider">Contrast <input id="contrast" type="range" min="-100" max="100"><output id="contrastValue"></output></label>
+<label class="style-slider">Brightness <input id="brightness" type="range" min="-100" max="100"><output id="brightnessValue"></output></label>
+<label class="style-slider">Material highlighting <input id="material" type="range" min="0" max="100"><output id="materialValue"></output></label>
+<button id="inherit" hidden>Use view styling</button>
+</fieldset>
+<p class="style-note">Color maps mark detected regions. X-Ray styles visible pixels only.</p>
+</section>
+<section class="panel export"><div class="panel-head"><span class="eyebrow">EXPORT</span><span class="dimensions">TRANSPARENT PNG</span></div><label class="check"><input type="checkbox" id="edited"> Apply opacity and transforms to PNGs</label><div class="tools"><button id="png" disabled>Selected PNG</button><button id="zip" class="primary" disabled>Download ZIP</button></div><div class="tools more-export"><button id="viewPng" disabled>View PNG</button><button id="original" disabled>Original photo</button></div></section>
+</aside>
+</div>
+<footer><span><i></i> Photo processing stays on this device</span><span>AI estimates masks. Exports use visible source pixels only. Covered areas stay transparent.</span></footer>
+</main>
+<script type="module" src="app.js?v=7"></script>
+</body></html>
