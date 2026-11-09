@@ -1,0 +1,7 @@
+Inpainting model: LaMa by Suvorov et al., https://github.com/advimman/lama (Apache-2.0).
+ONNX conversion: https://huggingface.co/Carve/LaMa-ONNX (Apache-2.0).
+Quantized model: https://huggingface.co/othytenk/lama-int4-int8 (Apache-2.0).
+The original lama_int4_int8_r4.onnx is split into two files for static hosting.
+SHA-256 of concatenated bytes:
+4e3b78a253eb4abf21896811c928ffa91214b916e5d6ced24cecdd7999b4aaa1
+Runtime: Microsoft ONNX Runtime Web 1.30.0 (MIT).

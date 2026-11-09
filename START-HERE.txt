@@ -1,26 +1,31 @@
-LayerPeel Studio | Local edition
+LayerPeel Studio
 
-This bundle includes the editor, WebAssembly runtime, and the segmentation and NSFW filter models.
-The editor can run on loopback without a sign-in or internet connection.
+Run from a GitHub checkout
+  npm ci
+  npm run build
+  python3 start.py
 
-1. Extract this ZIP to a folder.
-2. Open a terminal in the extracted folder and run:
-     python3 start.py
-   On Windows use:
-     py -3 start.py
-3. Open http://127.0.0.1:8046/ in Chrome.
-4. Keep the terminal open while using the editor. Press Ctrl+C to stop it.
+Open http://127.0.0.1:8046/ in Chrome. The build downloads public model
+files and verifies their SHA-256 hashes. Photos are processed on your
+device. A built checkout can be served locally without internet access.
 
-On Android, the hosted edition can be cached using Enable offline and opened
-from Chrome or its home-screen shortcut. To run this local ZIP directly on
-Android, you need a Python 3 environment or a local HTTP server that serves the
-included app folder from a loopback address. The local ZIP is a web app.
+Publish with GitHub Pages
+  In Settings > Pages, choose GitHub Actions as the source.
+  In Actions, open Deploy LayerPeel Studio and run the workflow on main.
+  Later changes to main trigger the same workflow.
 
-X-Ray visualization maps colors and edges from visible pixels. Material Map
-colors indicate segmentation categories. Masks can be corrected with Restore
-and Erase. Download ZIP includes transparent source PNGs and layers.json.
+Use the editor
+  Open a photo, then choose Separate layers. Layer Peel compares the original
+  with color-tinted masks and shows transparent cutouts in Exploded Layers.
+  Use each eye button to hide or show a layer. Select a tile, then use Selected
+  PNG or Download ZIP in Export. The quick Edge refine slider feathers the
+  preview. Restore and Erase edit the mask used for source PNGs.
 
-Models: MediaPipe SelfieMulticlass, EfficientDet-Lite0, and MagicTouch.
-Runtime: LiteRT.js 2.5.3 CPU WebAssembly. ZIP encoder: fflate 0.8.2.
+  Portrait masks cover visible hair, face, body skin, clothing and accessories
+  that the model identifies. Small details such as jewelry may need refinement.
+  X-Ray styles visible pixels. The NSFW switch controls the on-device import
+  filter and is on by default.
 
-Block NSFW imports is enabled by default. Turn it off in the editor to skip the local check.
+  Complete a piece offers labeled AI estimates for eligible object layers after
+  separation on photos without detected people. Source PNGs stay separate.
+  On a hosted copy, Enable offline caches the app and models for later visits.
