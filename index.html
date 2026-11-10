@@ -8,7 +8,7 @@
 <title>LayerPeel Studio</title>
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="manifest" href="manifest.webmanifest">
-<link rel="stylesheet" href="style.css?v=9">
+<link rel="stylesheet" href="style.css?v=10">
 </head>
 <body>
 <header class="top">
@@ -94,9 +94,18 @@
 </fieldset>
 <p class="style-note">Color maps mark detected regions. X-Ray styles visible pixels only.</p>
 </section>
+<section class="panel styling" aria-labelledby="beatvisionTitle">
+<div class="panel-head"><span class="eyebrow" id="beatvisionTitle">BEATVISION IMAGE GENERATOR</span><span class="dimensions">AI REFERENCE · NOT INPAINTING</span></div>
+<p class="style-note">Generate a separate visual reference using BeatVision's FLUX.1 Schnell. Original photo and extracted pixels are never changed. Requires a deployed, authenticated server bridge.</p>
+<label class="style-select" for="beatvisionPrompt">Reference description</label>
+<textarea id="beatvisionPrompt" rows="3" maxlength="1200" placeholder="Describe an object or scene to generate as a separate AI reference."></textarea>
+<div class="tools"><button id="beatvisionGenerate" class="primary">Generate reference</button><button id="beatvisionDownload" disabled>Download generated PNG</button></div>
+<p class="style-note" id="beatvisionStatus" role="status">NOT VERIFIED — server bridge not connected.</p>
+<img id="beatvisionResult" alt="AI-generated BeatVision reference, not source pixels" hidden style="display:block;max-width:100%;max-height:420px;object-fit:contain;border-radius:10px;">
+</section>
 <section class="panel export"><div class="panel-head"><span class="eyebrow">EXPORT</span><span class="dimensions">TRANSPARENT PNG</span></div><label class="check"><input type="checkbox" id="edited"> Apply opacity and transforms to PNGs</label><div class="tools"><button id="png" disabled>Selected PNG</button><button id="zip" class="primary" disabled>Download ZIP</button></div><div class="tools more-export"><button id="viewPng" disabled>View PNG</button><button id="original" disabled>Original photo</button></div></section>
 </div>
 <footer><span><i></i> Photo processing stays on this device</span><span>Source PNGs use visible pixels. AI completion is for objects and is labeled separately.</span></footer>
 </main>
-<script type="module" src="app.js?v=9"></script>
+<script type="module" src="app.js?v=10"></script>
 </body></html>
