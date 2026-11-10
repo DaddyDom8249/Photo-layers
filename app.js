@@ -1,3 +1,4 @@
+import {generateBeatVisionReference} from './beatvision-generator.js';
 import {extractAt, separate} from './engine.js';
 import {makePlan, completeLayer} from './completion.js';
 import {zipSync, strToU8} from './zip.js';
@@ -1132,3 +1133,44 @@ $('offline').onclick = () => {
 
 syncStyleControls();
 syncControls();
+
+
+// BeatVision generates an independent reference image. It never replaces an
+// extracted layer or claims reconstruction of hidden pixels.
+let beatvisionGeneratedImage = null;
+$('beatvisionGenerate').onclick = async () => {
+  const button = $('beatvisionGenerate');
+  const message = $('beatvisionStatus');
+  const preview = $('beatvisionResult');
+  button.disabled = true;
+  message.textContent = 'Contacting the authenticated BeatVision image bridge…';
+  preview.hidden = true;
+  preview.style.display = 'none';
+  $('beatvisionDownload').disabled = true;
+  beatvisionGeneratedImage = null;
+  try {
+    const result = await generateBeatVisionReference($('beatvisionPrompt').value);
+    beatvisionGeneratedImage = result.imageUrl;
+    preview.src = result.imageUrl;
+    preview.hidden = false;
+    preview.style.display = 'block';
+    $('beatvisionDownload').disabled = false;
+    message.textContent = 'AI GENERATED · FLUX.1 Schnell reference. Not source pixels or inpainting.';
+  } catch (error) {
+    message.textContent = 'BLOCKED · ' + error.message;
+  } finally {
+    button.disabled = false;
+  }
+};
+$('beatvisionDownload').onclick = async () => {
+  if (!beatvisionGeneratedImage) return;
+  try {
+    const response = await fetch(beatvisionGeneratedImage);
+    if (!response.ok) throw new Error('Could not retrieve the generated image.');
+    const blob = await response.blob();
+    if (!blob.type.startsWith('image/')) throw new Error('Image response has an invalid type.');
+    download(blob, 'beatvision-ai-generated-reference.' + (blob.type.includes('jpeg') ? 'jpg' : blob.type.includes('webp') ? 'webp' : 'png'));
+  } catch (error) {
+    $('beatvisionStatus').textContent = 'Export failed · ' + error.message;
+  }
+};
