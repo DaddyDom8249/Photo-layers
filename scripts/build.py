@@ -63,7 +63,7 @@ def main():
     if DIST.exists():
         rmtree(DIST)
     DIST.mkdir()
-    for name in ("index.html", "app.js", "engine.js", "filter.js", "styles.js",
+    for name in ("index.html", "app.js", "beatvision-generator.js", "engine.js", "filter.js", "styles.js",
                  "completion.js", "completion-worker.js", "sw.js", "style.css",
                  "icon.svg", "icon-192.png", "icon-512.png", "manifest.webmanifest",
                  "LICENSE.txt", "FFLATE-LICENSE.txt", "NSFWJS-LICENSE.txt",

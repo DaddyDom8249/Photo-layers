@@ -1,6 +1,6 @@
-const CACHE = 'layerpeel-offline-9';
-const PREVIOUS_CACHE = 'layerpeel-offline-8';
-const shell = ['style.css?v=9', 'styles.js', 'app.js?v=9', 'filter.js', 'filter-model.js', 'completion.js', 'completion-worker.js', 'engine.js', 'zip.js', 'sw.js',
+const CACHE = 'layerpeel-offline-11';
+const PREVIOUS_CACHE = 'layerpeel-offline-9';
+const shell = ['style.css?v=10', 'styles.js', 'app.js?v=11', 'beatvision-generator.js?v=11', 'filter.js', 'filter-model.js', 'completion.js', 'completion-worker.js', 'engine.js', 'zip.js', 'sw.js',
   'icon.svg', 'icon-192.png', 'icon-512.png', 'manifest.webmanifest', 'vision/litert.js', 'models/labels.js'];
 const models = ['models/portrait.tflite', 'models/objects.tflite', 'models/touch.tflite', 'models/anchors.bin',
   'vision/wasm/litert_wasm_internal.js', 'vision/wasm/litert_wasm_internal.wasm',
@@ -9,7 +9,7 @@ const models = ['models/portrait.tflite', 'models/objects.tflite', 'models/touch
   'reconstruction/ort-wasm-simd-threaded.wasm', 'reconstruction/lama-0', 'reconstruction/lama-1'];
 const url = path => new URL(path, self.registration.scope).href;
 const assets = [...shell, ...models, 'index.html', './'].map(url);
-const legacyAssets = new Set([...shell, ...models, 'app.js?v=8', 'style.css?v=8'].map(url));
+const legacyAssets = new Set([...shell, ...models, 'app.js?v=9', 'style.css?v=9'].map(url));
 const reusable = new Set(models.map(url));
 self.addEventListener('install', event => event.waitUntil(self.skipWaiting()));
 self.addEventListener('activate', event => event.waitUntil(self.clients.claim()));

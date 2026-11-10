@@ -1,4 +1,3 @@
-import {generateBeatVisionReference} from './beatvision-generator.js';
 import {extractAt, separate} from './engine.js';
 import {makePlan, completeLayer} from './completion.js';
 import {zipSync, strToU8} from './zip.js';
@@ -1149,6 +1148,7 @@ $('beatvisionGenerate').onclick = async () => {
   $('beatvisionDownload').disabled = true;
   beatvisionGeneratedImage = null;
   try {
+    const {generateBeatVisionReference} = await import('./beatvision-generator.js?v=11');
     const result = await generateBeatVisionReference($('beatvisionPrompt').value);
     beatvisionGeneratedImage = result.imageUrl;
     preview.src = result.imageUrl;
