@@ -178,3 +178,4 @@ main { max-width: 1552px; padding: 10px 16px 18px; }
   .quick-controls label { gap: 3px; padding-inline: 4px; font-size: 11px; }
   .quick-controls output { min-width: 28px; }
 }
+.gpt-panel{margin:12px 0;padding:16px;border:1px solid #345568;border-radius:14px;background:#101d29}.gpt-panel h2{margin:0 0 8px;font-size:18px}.gpt-panel p{font-size:13px;line-height:1.5;max-width:75ch}.gpt-panel button{min-height:44px}#gptStatus{color:#85dcff;overflow-wrap:anywhere}

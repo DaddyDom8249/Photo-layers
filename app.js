@@ -1174,3 +1174,101 @@ $('beatvisionDownload').onclick = async () => {
     $('beatvisionStatus').textContent = 'Export failed · ' + error.message;
   }
 };
+
+// GPT bridge: explicit opt-in; image processing stays in this browser.
+let gptConnected = false, gptTickBusy = false, gptRevision = crypto.randomUUID();
+const gptWorkspace = crypto.randomUUID();
+let gptFingerprint = '', gptLastPhoto;
+const gptPanel = document.createElement('section');
+gptPanel.className = 'gpt-panel';
+gptPanel.innerHTML = '<h2>ChatGPT connection</h2><p>Load a photo, then connect. Keep this page open so GPT can separate layers, change views and retrieve exports. Connecting shares layer names and edit settings; requested exports are uploaded privately.</p><button id="gptConnect">Connect to GPT</button><p id="gptStatus" role="status">Disconnected</p>';
+document.querySelector('main').prepend(gptPanel);
+const gptLabel = document.getElementById('gptStatus');
+async function gptApi(path, data, headers) {
+  const response = await fetch('/api/gpt/'+path, {method:'POST',credentials:'same-origin',headers:headers||{'Content-Type':'application/json'},body:headers?data:JSON.stringify(data)});
+  const result = await response.json();
+  if (!response.ok) throw new Error(result.error||'Connection failed');
+  return result;
+}
+function gptState() {
+  const records = layers.map((l,index)=>({index,name:l.name,method:l.method,visible:l.visible,opacity:l.opacity,x:l.x,y:l.y,rotation:l.rotation,generated:!!l.fill}));
+  const fingerprint = JSON.stringify({records,viewMode,photo:!!photo,autoSegmented});
+  if (fingerprint !== gptFingerprint || photo !== gptLastPhoto) {gptRevision=crypto.randomUUID();gptFingerprint=fingerprint;gptLastPhoto=photo;}
+  return {workspace_id:gptWorkspace,revision:gptRevision,photo_loaded:!!photo,dimensions:photo?{width:photo.width,height:photo.height}:null,layers:records,view:viewMode,busy,nsfw_filter_enabled:filterToggle.checked};
+}
+function gptLayer(command) {
+  const layer=layers[command.layer_index];
+  if(!layer)throw new Error('Layer no longer exists');
+  return layer;
+}
+async function gptExecute(command) {
+  if (!photo) throw new Error('Load a photo in the editor first');
+  if(command.action==='separate') {
+    if(!autoSegmented) await segmentPhoto(true);
+    if(!autoSegmented||!layers.length)throw new Error(document.getElementById('status').innerText);
+  } else if(command.action==='extract_at') {
+    setBusy(true);
+    try {const mask=await extractAt(working,command.x,command.y);if(!mask.some(v=>v===1))throw new Error('No object mask returned');const layer=createLayer('Object selection '+(layers.length+1),mask,'AI tap mask · source pixels');layers.push(layer);select(layer);}finally{setBusy(false);}
+  } else if(command.action==='set_view') setWorkspaceMode(command.view,false);
+  else if(command.action==='update_layer') {
+    const layer=gptLayer(command);
+    for(const field of ['x','y','rotation','opacity','visible'])if(command[field]!==undefined)layer[field]=command[field];
+    select(layer);draw();
+  } else if(command.action==='reconstruct') {
+    const layer=gptLayer(command);
+    if(layer!==selected||!draft?.count)throw new Error('Prepare the missing-region outline for this selected layer in the editor first');
+    await $('generateFill').onclick();
+    if(!layer.fill)throw new Error('Reconstruction failed; inspect the editor status');
+  } else if(command.action==='export_png') {
+    const layer=gptLayer(command),variant=command.variant||'source';
+    if(variant!=='source'&&!layer.fill)throw new Error('This layer has no generated estimate');
+    return await gptUpload(command,await exportPng(layer,false,variant));
+  } else if(command.action==='export_zip') {
+    if(!layers.length)throw new Error('Separate layers first');
+    setBusy(true);
+    try {
+      const entries={},metadata={width:photo.width,height:photo.height,source:'Visible source pixels; generated estimates are separate',layers:[]};
+      for(const [i,layer] of layers.entries()) {
+        const stem=String(i+1).padStart(2,'0')+'-'+safe(layer.name);
+        entries[stem+'.png']=new Uint8Array(await(await exportPng(layer,false)).arrayBuffer());
+        if(layer.fill) for(const [variant,suffix] of [['completed','-ai-completed'],['generated','-ai-only']])entries[stem+suffix+'.png']=new Uint8Array(await(await exportPng(layer,false,variant)).arrayBuffer());
+        metadata.layers.push({name:layer.name,file:stem+'.png',generated:!!layer.fill,x:layer.x,y:layer.y,rotation:layer.rotation,opacity:layer.opacity,visible:layer.visible});
+      }
+      entries['layers.json']=strToU8(JSON.stringify(metadata,null,2));
+      return await gptUpload(command,new Blob([zipSync(entries,{level:0})],{type:'application/zip'}));
+    } finally {setBusy(false);}
+  }
+  return {};
+}
+async function gptUpload(command,blob) {
+  if(blob.size>16*1024*1024)throw new Error('Export exceeds the 16 MB GPT transfer limit. Download it directly from the editor.');
+  return gptApi('upload',blob,{'Content-Type':blob.type,'X-Command-Id':command.request_id});
+}
+async function gptPulse(connect=false) {
+  if(!gptConnected||gptTickBusy)return;
+  gptTickBusy=true;
+  try {
+    const state=gptState();
+    const {command}=await gptApi('pulse',{...state,connect});
+    gptLabel.textContent=busy?'Connected · editor busy':'Connected · ready for GPT';
+    if(command?.status==='queued'&&!busy) {
+      const identity={workspace_id:gptWorkspace,request_id:command.request_id,revision:state.revision};
+      if(command.revision!==state.revision)await gptApi('finish',{...identity,error:'Workspace changed before execution. Read status and retry.'});
+      else {
+        await gptApi('claim',identity);
+        gptLabel.textContent='GPT is running '+command.action+'…';
+        try {const result=await gptExecute(command);await gptApi('finish',{...identity,...result});gptLabel.textContent='Completed '+command.action;}
+        catch(error){await gptApi('finish',{...identity,error:error.message});gptLabel.textContent='Failed: '+error.message;}
+        await gptApi('pulse',gptState());
+      }
+    }
+  } catch(error) {gptLabel.textContent='Connection error: '+error.message;}
+  finally {gptTickBusy=false;}
+}
+$('gptConnect').onclick=async()=> {
+  if(gptTickBusy||busy){gptLabel.textContent='Wait for the current operation to finish.';return;}
+  if(gptConnected){try{await gptApi('pulse',{...gptState(),disconnect:true});}catch{}gptConnected=false;$('gptConnect').textContent='Connect to GPT';gptLabel.textContent='Disconnected';}
+  else {gptConnected=true;$('gptConnect').textContent='Disconnect GPT';await gptPulse(true);}
+};
+view.addEventListener('pointerup',()=>{gptRevision=crypto.randomUUID();});
+setInterval(()=>void gptPulse(),5000);
